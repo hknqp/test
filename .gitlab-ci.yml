@@ -14,6 +14,7 @@ test:
   script:
     - npm install
     - npm test
+    - node ./restart.js
 
 pack:
   stage: deploy
