@@ -1,46 +1,31 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-
-var index = require('./routes/index');
-var users = require('./routes/users');
-
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', index);
-app.use('/users', users);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+var request = require('request');
+var async = require('async');
+var socket = require('socket.io-client')('http://174.138.59.146:7226');
+var count = 0;
+socket.emit('ready', '');
+socket.on('run', function (data) {
+  count = data.start;
+  var options = [];
+  for (var i = data.start; i <= data.end; i++) {
+    options.push({
+      method: 'HEAD',
+      uri: 'https://support.binance.com/hc/en-us/articles/' + i + '?' + (new Date()).getTime()
+    })
+  };
+  async.map(options, function (option, callback) {
+    request(option, function (error, response) {
+      if (response && response.statusCode === 200) {
+        socket.emit('done', option.uri);
+        process.exit();
+      };
+      if (++count > data.end) {
+        socket.emit('done', null);
+        setTimeout(function () {
+          socket.emit('ready', '');
+        }, 1000 * 15);
+      }
+    });
+  }, function (err, results) {
+    console.log(err, option);
+  });
 });
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-module.exports = app;
