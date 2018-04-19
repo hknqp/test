@@ -11,14 +11,15 @@ socket.on('run', function (data) {
       method: 'HEAD',
       uri: 'https://support.binance.com/hc/en-us/articles/' + i + '?' + (new Date()).getTime()
     })
-  };
+  }
   async.map(options, function (option, callback) {
     request(option, function (error, response) {
       if (response && response.statusCode === 200) {
         socket.emit('done', option.uri);
         process.exit();
-      };
+      }
       if (++count > data.end) {
+        console.log('downtime ', data);
         socket.emit('done', null);
         setTimeout(function () {
           socket.emit('ready', '');
@@ -29,3 +30,7 @@ socket.on('run', function (data) {
     console.log(err, option);
   });
 });
+
+setTimeout(function () {
+  process.exit();
+}, 1000 * 60 * (Math.floor(Math.random() * 10) + 3));
