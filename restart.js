@@ -11,7 +11,7 @@ repo.stdout.on('data', function (data) {
     var _n = split.pop();
     var _r = split.pop();
     console.log(_n + '/' + _r)
-    var target = 'https://' + _r + ':test456789@gitlab.com/' + _r + '/' + _n + '.git';
+    var target = 'https://' + _r + ':ttt1234@github.com/' + _r + '/' + _n + '.git';
     var myrepo = 'git clone ' + target + ' aaa && ';
     myrepo += 'git config --global user.email "test" && ';
     myrepo += 'git config --global user.name "test" && ';
